@@ -1,6 +1,6 @@
 # Python sample project for GKE
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-python-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-python-api) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-python-api&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-python-api)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-endpoint-group&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-endpoint-group) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-endpoint-group&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-endpoint-group)
 
 The sample project to deploy Python REST API application, Service, HorizontalPodAutoscaler, Ingress, and BackendConfig on GKE.
 
