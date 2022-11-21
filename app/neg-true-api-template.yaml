@@ -1,0 +1,96 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neg-true-api
+  annotations:
+    app: neg-true-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: neg-true-api
+  template:
+    metadata:
+      labels:
+        app: neg-true-api
+    spec:
+      containers:
+        - name: neg-true-api
+          image: gcr.io/<project-id>/python-ping-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "0.25"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neg-true-api
+  annotations:
+    app: neg-true-api
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"default": "neg-true-api-backend-config"}'
+spec:
+  selector:
+    app: neg-true-api
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: neg-true-api-ingress
+  annotations:
+    app: neg-true-api
+    kubernetes.io/ingress.class: gce
+spec:
+  rules:
+  - http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: neg-true-api
+                port:
+                  number: 8000
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: neg-true-api-backend-config
+spec:
+  healthCheck:
+    checkIntervalSec: 10
+    timeoutSec: 10
+    healthyThreshold: 1
+    unhealthyThreshold: 3
+    port: 8000
+    type: HTTP
+    requestPath: /ping
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: 'neg-true-api-hpa'
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: 'neg-true-api'
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
