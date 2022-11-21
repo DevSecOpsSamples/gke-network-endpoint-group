@@ -2,7 +2,7 @@
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-endpoint-group&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-endpoint-group) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-endpoint-group&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-endpoint-group)
 
-The sample project to deploy Python REST API application, Service, HorizontalPodAutoscaler, Ingress, and BackendConfig on GKE.
+The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Port of GKE.
 
 - [app.py](app/app.py)
 - [neg-true-api-template.yaml](app/neg-true-api-template.yaml)
@@ -52,7 +52,7 @@ kubectl create namespace neg-false-api
 ## Build and push to GCR
 
 ```bash
-cd ../app
+cd ./app
 docker build -t python-ping-api . --platform linux/amd64
 docker tag python-ping-api:latest gcr.io/${PROJECT_ID}/python-ping-api:latest
 
