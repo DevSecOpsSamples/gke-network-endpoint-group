@@ -229,7 +229,7 @@ NOTE: `Ingress` is not required when creating a Service with the `LoadBalancer` 
 | Kind    | Element                     | Value             | Description             |
 |---------|-----------------------------|-------------------|-------------------------|
 | Service | spec.type                   | LoadBalancer      |                         |
-| Service | spec.ports.port             | 80                |                         |
+| Service | spec.ports.port             | 80                | You can access with `<external-endpoint-ip>:<port>`. |
 | Service | spec.ports.nodePort         | 31000             | This element is **optional** and GKE will assign a port in 30000-32768 range automatically if you do not aggign it. |
 
 ```yaml
