@@ -15,7 +15,9 @@ The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Por
 | Create a GCP Load Balancer | O             | X                 |
 | Use a NodePort             | X             | O                 |
 
+```bash
 kubectl get svc
+```
 
 ```bash
 NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        AGE
