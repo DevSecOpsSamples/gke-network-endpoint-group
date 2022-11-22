@@ -280,7 +280,13 @@ kubectl get svc -n loadbalancer-type-api
 
     ![loadbalancer-type](./screenshots/lbtype-services.png?raw=true)
 
+- Services & Ingress > Service details > OVERVIEW
+
     ![loadbalancer-type](./screenshots/lbtype-services-overview.png?raw=true)
+
+- Services & Ingress > Service details > DETAILS
+
+    ![loadbalancer-type](./screenshots/lbtype-services-details.png?raw=true)
 
 ---
 
