@@ -32,15 +32,15 @@ metadata:
   name: loadbalancer-type-api
   annotations:
     app: loadbalancer-type-api
-    # cloud.google.com/neg: '{"ingress": false}'
 spec:
   selector:
     app: loadbalancer-type-api
   type: LoadBalancer
+  externalTrafficPolicy: Local
   ports:
     - port: 80
       targetPort: 8000
-      nodePort: 30000
+      nodePort: 31000
       protocol: TCP
 ---
 apiVersion: autoscaling/v2beta2

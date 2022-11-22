@@ -4,9 +4,16 @@
 
 The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Port of GKE.
 
-- [app.py](app/app.py)
 - [neg-ingress-api-template.yaml](app/neg-ingress-api-template.yaml)
-- [neg-false-api-template.yaml](app/neg-false-api-template.yaml)
+- [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
+
+kubectl get svc -n your-namespaces
+
+```bash
+NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        AGE
+neg-ingress-api         ClusterIP      10.99.128.193   <none>          8000/TCP       158m
+loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/TCP   149m
+```
 
 ---
 
@@ -76,6 +83,12 @@ kubectl apply -f neg-ingress-api.yaml -n neg-ingress-api
 
 [neg-ingress-api-template.yaml](app/neg-ingress-api-template.yaml):
 
+| Kind    | Element                     | Value             | Description             |
+|---------|-----------------------------|-------------------|-------------------------|
+| Service | spec.type                   | **ClusterIP**      |                         |
+| Service | metadata.annotations        | cloud.google.com/neg: '{"ingress": true}'       |                         |
+| Ingress | metadata.annotations        | kubernetes.io/ingress.class: gce       |                         |
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -135,6 +148,7 @@ kubectl logs -l app=neg-ingress-api -n neg-ingress-api
 
 kubectl describe pods -n neg-ingress-api
 
+#kubectl get svc -n neg-ingress-api
 kubectl describe svc -n neg-ingress-api
 
 kubectl get ingress neg-ingress-api-ingress -n neg-ingress-api
@@ -159,6 +173,7 @@ kubectl get ingress neg-ingress-api-ingress -n neg-ingress-api
 - Services & Ingress > INGRESS > DETAILS
 
     https://console.cloud.google.com/kubernetes/ingresses
+
     ![neg-ingress](./screenshots/neg-ingress-4-ingress-details.png?raw=true)
 
 - Network services > Load balancing > LOAD BALANCERS
@@ -184,9 +199,15 @@ cat loadbalancer-type-api.yaml
 kubectl apply -f loadbalancer-type-api.yaml -n loadbalancer-type-api
 ```
 
-Create a Service without Ingress and define the `nodePort: 30000`.
+Create a Service without Ingress and define the `nodePort: 31000`.
 
 [loadbalancer-type-api-template.yaml](app/loadbalancer-type-api-template.yaml):
+
+| Kind    | Element                     | Value             | Description             |
+|---------|-----------------------------|-------------------|-------------------------|
+| Service | spec.type                   | LoadBalancer      |                         |
+| Service | spec.ports.port             | 80                |                         |
+| Service | spec.ports.nodePort         | 31000             |                         |
 
 ```yaml
 apiVersion: v1
@@ -199,10 +220,11 @@ spec:
   selector:
     app: loadbalancer-type-api
   type: LoadBalancer
+  externalTrafficPolicy: Local
   ports:
     - port: 80
       targetPort: 8000
-      nodePort: 30000
+      nodePort: 31000
       protocol: TCP
 ```
 
@@ -213,16 +235,26 @@ kubectl logs -l app=loadbalancer-type-api -n loadbalancer-type-api
 
 kubectl describe pods -n loadbalancer-type-api
 
-kubectl describe svc -n loadbalancer-type-api > svc.txt
+kubectl describe svc -n loadbalancer-type-api
 ```
+
+### Screenshots
+
+- Services & Ingress > SERVICES
+
+    https://console.cloud.google.com/kubernetes/discovery
+
+    ![loadbalancer-type](./screenshots/lbtype-services.png?raw=true)
+
+    ![loadbalancer-type](./screenshots/lbtype-services-overview.png?raw=true)
 
 ---
 
 ## Cleanup
 
 ```bash
-kubectl delete -f app/neg-false-api.yaml -n neg-false-api
 kubectl delete -f app/neg-ingress-api.yaml -n neg-ingress-api
+kubectl delete -f app/loadbalancer-type-api.yaml -n loadbalancer-type-api
 
 gcloud container clusters delete sample-cluster
 ```
