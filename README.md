@@ -30,8 +30,6 @@ loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/
 - Learn about difference among Ingress, LoadBalacer, NodePort on GKE
 - Learn about Kubernetes object specification for Ingress/ClusterIP and 3 LoadBalacer/NodePort
 
----
-
 ## Table of Contents
 
 - Create a GKE cluster and namespaces
