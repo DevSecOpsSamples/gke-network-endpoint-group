@@ -5,7 +5,7 @@
 The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Port of GKE.
 
 - [app.py](app/app.py)
-- [neg-true-api-template.yaml](app/neg-true-api-template.yaml)
+- [neg-ingress-api-template.yaml](app/neg-ingress-api-template.yaml)
 - [neg-false-api-template.yaml](app/neg-false-api-template.yaml)
 
 ---
@@ -43,7 +43,9 @@ gcloud container clusters get-credentials sample-cluster
 ```
 
 ```bash
-kubectl create namespace neg-true-api
+kubectl create namespace neg-ingress-api
+kubectl create namespace loadbalancer-type-api
+
 kubectl create namespace neg-false-api
 ```
 
@@ -60,27 +62,146 @@ gcloud auth configure-docker
 docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 ```
 
-## Deploy neg-true-api
+## Deploy neg-ingress-api
 
 Create and deploy K8s Deployment, Service, HorizontalPodAutoscaler, Ingress, and GKE BackendConfig using the template files.
 It may take around 5 minutes to create a load balancer, including health checking.
 
-```bash
-sed -e "s|<project-id>|${PROJECT_ID}|g" neg-true-api-template.yaml > neg-true-api.yaml
-cat neg-true-api.yaml
 
-kubectl apply -f neg-true-api.yaml -n neg-true-api
+```bash
+sed -e "s|<project-id>|${PROJECT_ID}|g" neg-ingress-api-template.yaml > neg-ingress-api.yaml
+cat neg-ingress-api.yaml
+
+kubectl apply -f neg-ingress-api.yaml -n neg-ingress-api
+```
+
+[neg-ingress-api-template.yaml](app/neg-ingress-api-template.yaml):
+
+```bash
+apiVersion: v1
+kind: Service
+metadata:
+  name: neg-ingress-api
+  annotations:
+    app: neg-ingress-api
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"default": "neg-ingress-api-backend-config"}'
+spec:
+  selector:
+    app: neg-ingress-api
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: neg-ingress-api-ingress
+  annotations:
+    app: neg-ingress-api
+    kubernetes.io/ingress.class: gce
+spec:
+  rules:
+  - http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: neg-ingress-api
+                port:
+                  number: 8000
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: neg-ingress-api-backend-config
+spec:
+  healthCheck:
+    checkIntervalSec: 10
+    timeoutSec: 10
+    healthyThreshold: 1
+    unhealthyThreshold: 3
+    port: 8000
+    type: HTTP
+    requestPath: /ping
 ```
 
 Confirm that pod configuration and logs after deployment:
 
 ```bash
-kubectl logs -l app=neg-true-api -n neg-true-api
+kubectl logs -l app=neg-ingress-api -n neg-ingress-api
 
-kubectl describe pods -n neg-true-api
+kubectl describe pods -n neg-ingress-api
 
-kubectl get ingress neg-true-api-ingress -n neg-true-api
+kubectl describe svc  -n neg-ingress-api
+
+kubectl get ingress neg-ingress-api-ingress -n neg-ingress-api
 ```
+
+### Screenshots
+
+- Services & Ingress > SERVICES
+
+    ![neg-ingress](./screenshots/neg-ingress-1-services.png?raw=true)
+
+- Services & Ingress > Service details > OVERVIEW
+
+    ![neg-ingress](./screenshots/neg-ingress-2-service-overview.png?raw=true)
+
+
+- Services & Ingress > Service details > DETAILS
+
+    ![neg-ingress](./screenshots/neg-ingress-3-service-details.png?raw=true)
+
+- Services & Ingress > INGRESS > DETAILS
+
+    ![neg-ingress](./screenshots/neg-ingress-4-ingress-details.png?raw=true)
+
+## Deploy loadbalancer-type-api
+
+```bash
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-type-api
+  annotations:
+    app: loadbalancer-type-api
+    cloud.google.com/neg: '{"ingress": false}'
+spec:
+  selector:
+    app: loadbalancer-type-api
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8000
+      nodePort: 30000
+      protocol: TCP
+```
+
+```bash
+sed -e "s|<project-id>|${PROJECT_ID}|g" loadbalancer-type-api-template.yaml > loadbalancer-type-api.yaml
+cat loadbalancer-type-api.yaml
+
+kubectl apply -f loadbalancer-type-api.yaml -n loadbalancer-type-api
+```
+
+Confirm that pod configuration and logs after deployment:
+
+```bash
+kubectl logs -l app=loadbalancer-type-api -n loadbalancer-type-api
+
+kubectl describe pods -n loadbalancer-type-api
+
+kubectl describe svc -n loadbalancer-type-api > svc.txt
+```
+
+NOTE: If you set `spec.type` as ClusterIP, error occurs like the below:
+
+![loadbalancer](./screenshots/neg-false-ingress-error.png?raw=true)
+
 
 ## Deploy neg-false-api
 
@@ -97,6 +218,8 @@ Confirm that pod configuration and logs after deployment:
 kubectl logs -l app=neg-false-api -n neg-false-api
 
 kubectl describe pods -n neg-false-api
+
+kubectl describe svc -n neg-false-api > svc.txt
 
 kubectl get ingress neg-false-api-ingress -n neg-false-api
 ```
@@ -126,21 +249,11 @@ spec:
 
 ---
 
-## Screenshots
-
-![loadbalancer](./screenshots/ingress-1-details.png?raw=true)
-
-![loadbalancer](./screenshots/ingress-2-logs.png?raw=true)
-
-![loadbalancer](./screenshots/ingress-3-event.png?raw=true)
-
----
-
 ## Cleanup
 
 ```bash
 kubectl delete -f app/neg-false-api.yaml -n neg-false-api
-kubectl delete -f app/neg-true-api.yaml -n neg-true-api
+kubectl delete -f app/neg-ingress-api.yaml -n neg-ingress-api
 
 gcloud container clusters delete sample-cluster
 ```
