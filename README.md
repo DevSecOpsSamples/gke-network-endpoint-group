@@ -9,7 +9,13 @@ The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Por
 - [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
 - [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
 
-kubectl get svc -n your-namespaces
+|                            | Ingress/NEG   |  LoadBalancer    |
+|----------------------------|---------------|-------------------|
+| K8s Service Type           | ClusterIP     | LoadBalancer      |
+| Create a GCP Load Balancer | O             | X                 |
+| Use a NodePort             | X             | O                 |
+
+kubectl get svc
 
 ```bash
 NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        AGE
@@ -22,7 +28,7 @@ loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/
 ## Objectives
 
 - Learn about difference among Ingress, LoadBalacer, NodePort on GKE
-- Learn about Kubernetes object specification for 3 type services
+- Learn about Kubernetes object specification for Ingress/ClusterIP and 3 LoadBalacer/NodePort
 
 ---
 
