@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: neg-false-api
+  name: neg-ingress-api
   annotations:
-    app: neg-false-api
+    app: neg-ingress-api
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: neg-false-api
+      app: neg-ingress-api
   template:
     metadata:
       labels:
-        app: neg-false-api
+        app: neg-ingress-api
     spec:
       containers:
-        - name: neg-false-api
+        - name: neg-ingress-api
           image: gcr.io/<project-id>/python-ping-api:latest
           imagePullPolicy: Always
           ports:
@@ -29,15 +29,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: neg-false-api
+  name: neg-ingress-api
   annotations:
-    app: neg-false-api
-    cloud.google.com/neg: '{"ingress": false}'
-    cloud.google.com/backend-config: '{"default": "neg-false-api-backend-config"}'
+    app: neg-ingress-api
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"default": "neg-ingress-api-backend-config"}'
 spec:
   selector:
-    app: neg-false-api
-  type: NodePort
+    app: neg-ingress-api
+  type: ClusterIP
   ports:
     - port: 8000
       targetPort: 8000
@@ -46,9 +46,9 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: neg-false-api-ingress
+  name: neg-ingress-api-ingress
   annotations:
-    app: neg-false-api
+    app: neg-ingress-api
     kubernetes.io/ingress.class: gce
 spec:
   rules:
@@ -58,14 +58,14 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: neg-false-api
+                name: neg-ingress-api
                 port:
                   number: 8000
 ---
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  name: neg-false-api-backend-config
+  name: neg-ingress-api-backend-config
 spec:
   healthCheck:
     checkIntervalSec: 10
@@ -79,12 +79,12 @@ spec:
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: 'neg-false-api-hpa'
+  name: 'neg-ingress-api-hpa'
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: 'neg-false-api'
+    name: 'neg-ingress-api'
   minReplicas: 2
   maxReplicas: 10
   metrics:
