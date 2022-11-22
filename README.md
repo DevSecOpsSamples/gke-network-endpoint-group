@@ -25,8 +25,6 @@ ingress-neg-api         ClusterIP      10.99.128.193   <none>          8000/TCP 
 loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/TCP   149m
 ```
 
----
-
 ## Objectives
 
 - Learn about difference among Ingress, LoadBalacer, NodePort on GKE
