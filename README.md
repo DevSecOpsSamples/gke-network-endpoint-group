@@ -19,6 +19,13 @@ loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/
 
 ---
 
+## Objectives
+
+- Learn about difference among Ingress, LoadBalacer, NodePort on GKE
+- Learn about Kubernetes object specification for 3 type services
+
+---
+
 ## Table of Contents
 
 - Create a GKE cluster and namespaces
@@ -223,7 +230,7 @@ NOTE: `Ingress` is not required when creating a Service with the `LoadBalancer` 
 |---------|-----------------------------|-------------------|-------------------------|
 | Service | spec.type                   | LoadBalancer      |                         |
 | Service | spec.ports.port             | 80                |                         |
-| Service | spec.ports.nodePort         | 31000             |                         |
+| Service | spec.ports.nodePort         | 31000             | This element is **optional** and GKE will assign a port in 30000-32768 range automatically if you do not aggign it. |
 
 ```yaml
 apiVersion: v1
