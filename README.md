@@ -76,7 +76,7 @@ kubectl apply -f neg-ingress-api.yaml -n neg-ingress-api
 
 [neg-ingress-api-template.yaml](app/neg-ingress-api-template.yaml):
 
-```bash
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -188,7 +188,7 @@ Create a Service without Ingress and define the `nodePort: 30000`.
 
 [loadbalancer-type-api-template.yaml](app/loadbalancer-type-api-template.yaml):
 
-```bash
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
