@@ -67,7 +67,6 @@ docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 Create and deploy K8s Deployment, Service, HorizontalPodAutoscaler, Ingress, and GKE BackendConfig using the template files.
 It may take around 5 minutes to create a load balancer, including health checking.
 
-
 ```bash
 sed -e "s|<project-id>|${PROJECT_ID}|g" neg-ingress-api-template.yaml > neg-ingress-api.yaml
 cat neg-ingress-api.yaml
@@ -136,7 +135,7 @@ kubectl logs -l app=neg-ingress-api -n neg-ingress-api
 
 kubectl describe pods -n neg-ingress-api
 
-kubectl describe svc  -n neg-ingress-api
+kubectl describe svc -n neg-ingress-api
 
 kubectl get ingress neg-ingress-api-ingress -n neg-ingress-api
 ```
@@ -145,12 +144,13 @@ kubectl get ingress neg-ingress-api-ingress -n neg-ingress-api
 
 - Services & Ingress > SERVICES
 
+    https://console.cloud.google.com/kubernetes/discovery
+
     ![neg-ingress](./screenshots/neg-ingress-1-services.png?raw=true)
 
 - Services & Ingress > Service details > OVERVIEW
 
     ![neg-ingress](./screenshots/neg-ingress-2-service-overview.png?raw=true)
-
 
 - Services & Ingress > Service details > DETAILS
 
@@ -158,9 +158,35 @@ kubectl get ingress neg-ingress-api-ingress -n neg-ingress-api
 
 - Services & Ingress > INGRESS > DETAILS
 
+    https://console.cloud.google.com/kubernetes/ingresses
     ![neg-ingress](./screenshots/neg-ingress-4-ingress-details.png?raw=true)
 
+- Network services > Load balancing > LOAD BALANCERS
+
+    https://console.cloud.google.com/net-services/loadbalancing/list/loadBalancers
+
+    ![loadbalancing](./screenshots/neg-ingress-lb-1.png?raw=true)
+
+- Network services > Load balancing > BACKENDS
+
+    https://console.cloud.google.com/net-services/loadbalancing/list/backends
+
+    ![loadbalancing](./screenshots/neg-ingress-lb-2-backend.png?raw=true)
+
+    ![loadbalancing](./screenshots/neg-ingress-lb-3-backend-details.png?raw=true)
+
 ## Deploy loadbalancer-type-api
+
+```bash
+sed -e "s|<project-id>|${PROJECT_ID}|g" loadbalancer-type-api-template.yaml > loadbalancer-type-api.yaml
+cat loadbalancer-type-api.yaml
+
+kubectl apply -f loadbalancer-type-api.yaml -n loadbalancer-type-api
+```
+
+Create a Service without Ingress and define the `nodePort: 30000`.
+
+[loadbalancer-type-api-template.yaml](app/loadbalancer-type-api-template.yaml):
 
 ```bash
 apiVersion: v1
@@ -169,7 +195,6 @@ metadata:
   name: loadbalancer-type-api
   annotations:
     app: loadbalancer-type-api
-    cloud.google.com/neg: '{"ingress": false}'
 spec:
   selector:
     app: loadbalancer-type-api
@@ -181,13 +206,6 @@ spec:
       protocol: TCP
 ```
 
-```bash
-sed -e "s|<project-id>|${PROJECT_ID}|g" loadbalancer-type-api-template.yaml > loadbalancer-type-api.yaml
-cat loadbalancer-type-api.yaml
-
-kubectl apply -f loadbalancer-type-api.yaml -n loadbalancer-type-api
-```
-
 Confirm that pod configuration and logs after deployment:
 
 ```bash
@@ -196,55 +214,6 @@ kubectl logs -l app=loadbalancer-type-api -n loadbalancer-type-api
 kubectl describe pods -n loadbalancer-type-api
 
 kubectl describe svc -n loadbalancer-type-api > svc.txt
-```
-
-NOTE: If you set `spec.type` as ClusterIP, error occurs like the below:
-
-![loadbalancer](./screenshots/neg-false-ingress-error.png?raw=true)
-
-
-## Deploy neg-false-api
-
-```bash
-sed -e "s|<project-id>|${PROJECT_ID}|g" neg-false-api-template.yaml > neg-false-api.yaml
-cat neg-false-api.yaml
-
-kubectl apply -f neg-false-api.yaml -n neg-false-api
-```
-
-Confirm that pod configuration and logs after deployment:
-
-```bash
-kubectl logs -l app=neg-false-api -n neg-false-api
-
-kubectl describe pods -n neg-false-api
-
-kubectl describe svc -n neg-false-api > svc.txt
-
-kubectl get ingress neg-false-api-ingress -n neg-false-api
-```
-
-NOTE: If you set `spec.type` as ClusterIP, error occurs like the below:
-
-![loadbalancer](./screenshots/neg-false-ingress-error.png?raw=true)
-
-```bash
-apiVersion: v1
-kind: Service
-metadata:
-  name: neg-false-api
-  annotations:
-    app: neg-false-api
-    cloud.google.com/neg: '{"ingress": false}'
-    cloud.google.com/backend-config: '{"default": "neg-false-api-backend-config"}'
-spec:
-  selector:
-    app: neg-false-api
-  type: ClusterIP # expected "NodePort" or "LoadBalancer"
-  ports:
-    - port: 8000
-      targetPort: 8000
-      protocol: TCP
 ```
 
 ---
