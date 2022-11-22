@@ -197,7 +197,7 @@ cat loadbalancer-type-api.yaml
 kubectl apply -f loadbalancer-type-api.yaml -n loadbalancer-type-api
 ```
 
-Create a Service without Ingress and define the `nodePort: 31000`.
+NOTE: Ingress is not required when creating a Service with the `LoadBalancer` type.
 
 [loadbalancer-type-api-template.yaml](app/loadbalancer-type-api-template.yaml):
 
