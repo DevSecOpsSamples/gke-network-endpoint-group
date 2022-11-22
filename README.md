@@ -4,14 +4,14 @@
 
 The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Port of GKE.
 
-- [neg-ingress-api-template.yaml](app/neg-ingress-api-template.yaml)
+- [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
 - [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
 
 kubectl get svc -n your-namespaces
 
 ```bash
 NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        AGE
-neg-ingress-api         ClusterIP      10.99.128.193   <none>          8000/TCP       158m
+ingress-neg-api         ClusterIP      10.99.128.193   <none>          8000/TCP       158m
 loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/TCP   149m
 ```
 
@@ -40,7 +40,7 @@ gcloud config set compute/zone ${COMPUTE_ZONE}
 
 ---
 
-## Create a GKE cluster
+## Create a GKE cluster and namespaces
 
 Create an Autopilot GKE cluster. It may take around 9 minutes.
 
@@ -50,7 +50,7 @@ gcloud container clusters get-credentials sample-cluster
 ```
 
 ```bash
-kubectl create namespace neg-ingress-api
+kubectl create namespace ingress-neg-api
 kubectl create namespace loadbalancer-type-api
 ```
 
@@ -67,19 +67,19 @@ gcloud auth configure-docker
 docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 ```
 
-## Deploy neg-ingress-api
+## Deploy ingress-neg-api
 
 Create and deploy K8s Deployment, Service, HorizontalPodAutoscaler, Ingress, and GKE BackendConfig using the template files.
 It may take around 5 minutes to create a load balancer, including health checking.
 
 ```bash
-sed -e "s|<project-id>|${PROJECT_ID}|g" neg-ingress-api-template.yaml > neg-ingress-api.yaml
-cat neg-ingress-api.yaml
+sed -e "s|<project-id>|${PROJECT_ID}|g" ingress-neg-api-template.yaml > ingress-neg-api.yaml
+cat ingress-neg-api.yaml
 
-kubectl apply -f neg-ingress-api.yaml -n neg-ingress-api
+kubectl apply -f ingress-neg-api.yaml -n ingress-neg-api
 ```
 
-[neg-ingress-api-template.yaml](app/neg-ingress-api-template.yaml):
+[ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml):
 
 | Kind    | Element                     | Value             | Description             |
 |---------|-----------------------------|-------------------|-------------------------|
@@ -91,14 +91,14 @@ kubectl apply -f neg-ingress-api.yaml -n neg-ingress-api
 apiVersion: v1
 kind: Service
 metadata:
-  name: neg-ingress-api
+  name: ingress-neg-api
   annotations:
-    app: neg-ingress-api
+    app: ingress-neg-api
     cloud.google.com/neg: '{"ingress": true}'
-    cloud.google.com/backend-config: '{"default": "neg-ingress-api-backend-config"}'
+    cloud.google.com/backend-config: '{"default": "ingress-neg-api-backend-config"}'
 spec:
   selector:
-    app: neg-ingress-api
+    app: ingress-neg-api
   type: ClusterIP
   ports:
     - port: 8000
@@ -108,9 +108,9 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: neg-ingress-api-ingress
+  name: ingress-neg-api-ingress
   annotations:
-    app: neg-ingress-api
+    app: ingress-neg-api
     kubernetes.io/ingress.class: gce
 spec:
   rules:
@@ -120,14 +120,14 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: neg-ingress-api
+                name: ingress-neg-api
                 port:
                   number: 8000
 ---
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  name: neg-ingress-api-backend-config
+  name: ingress-neg-api-backend-config
 spec:
   healthCheck:
     checkIntervalSec: 10
@@ -142,14 +142,14 @@ spec:
 Confirm that pod configuration and logs after deployment:
 
 ```bash
-kubectl logs -l app=neg-ingress-api -n neg-ingress-api
+kubectl logs -l app=ingress-neg-api -n ingress-neg-api
 
-kubectl describe pods -n neg-ingress-api
+kubectl describe pods -n ingress-neg-api
 
-#kubectl get svc -n neg-ingress-api
-kubectl describe svc -n neg-ingress-api
+#kubectl get svc -n ingress-neg-api
+kubectl describe svc -n ingress-neg-api
 
-kubectl get ingress neg-ingress-api-ingress -n neg-ingress-api
+kubectl get ingress ingress-neg-api-ingress -n ingress-neg-api
 ```
 
 ### Screenshots
@@ -251,7 +251,7 @@ kubectl describe svc -n loadbalancer-type-api
 ## Cleanup
 
 ```bash
-kubectl delete -f app/neg-ingress-api.yaml -n neg-ingress-api
+kubectl delete -f app/ingress-neg-api.yaml -n ingress-neg-api
 kubectl delete -f app/loadbalancer-type-api.yaml -n loadbalancer-type-api
 
 gcloud container clusters delete sample-cluster
