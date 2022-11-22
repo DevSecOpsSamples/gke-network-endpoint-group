@@ -2,6 +2,8 @@
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-endpoint-group&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-endpoint-group) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-endpoint-group&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-endpoint-group)
 
+## Overview
+
 The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Port of GKE.
 
 - [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
@@ -14,6 +16,22 @@ NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)  
 ingress-neg-api         ClusterIP      10.99.128.193   <none>          8000/TCP       158m
 loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/TCP   149m
 ```
+
+---
+
+## Table of Contents
+
+- Create a GKE cluster and namespaces
+- Build and push to GCR
+- Ingress with Network Endpoint Group(NEG)
+    - Object Spec
+    - Deploy ingress-neg-api
+    - Screenshots
+- LoadBalancer Type with NodePort
+    - Object Spec
+    - Deploy loadbalancer-type-api
+    - Screenshots
+- Cleanup
 
 ---
 
@@ -40,7 +58,7 @@ gcloud config set compute/zone ${COMPUTE_ZONE}
 
 ---
 
-## Create a GKE cluster and namespaces
+## 1. Create a GKE cluster and namespaces
 
 Create an Autopilot GKE cluster. It may take around 9 minutes.
 
@@ -56,7 +74,7 @@ kubectl create namespace loadbalancer-type-api
 
 ---
 
-## Build and push to GCR
+## 2. Build and push to GCR
 
 ```bash
 cd ./app
@@ -67,17 +85,9 @@ gcloud auth configure-docker
 docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 ```
 
-## Deploy ingress-neg-api
+## 3. Ingress with Network Endpoint Group(NEG)
 
-Create and deploy K8s Deployment, Service, HorizontalPodAutoscaler, Ingress, and GKE BackendConfig using the template files.
-It may take around 5 minutes to create a load balancer, including health checking.
-
-```bash
-sed -e "s|<project-id>|${PROJECT_ID}|g" ingress-neg-api-template.yaml > ingress-neg-api.yaml
-cat ingress-neg-api.yaml
-
-kubectl apply -f ingress-neg-api.yaml -n ingress-neg-api
-```
+### 3.1 Object Spec
 
 [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml):
 
@@ -139,6 +149,18 @@ spec:
     requestPath: /ping
 ```
 
+### 3.2 Deploy ingress-neg-api
+
+Create and deploy K8s Deployment, Service, HorizontalPodAutoscaler, Ingress, and GKE BackendConfig using the template files.
+It may take around 5 minutes to create a load balancer, including health checking.
+
+```bash
+sed -e "s|<project-id>|${PROJECT_ID}|g" ingress-neg-api-template.yaml > ingress-neg-api.yaml
+cat ingress-neg-api.yaml
+
+kubectl apply -f ingress-neg-api.yaml -n ingress-neg-api
+```
+
 Confirm that pod configuration and logs after deployment:
 
 ```bash
@@ -152,7 +174,7 @@ kubectl describe svc -n ingress-neg-api
 kubectl get ingress ingress-neg-api-ingress -n ingress-neg-api
 ```
 
-### Screenshots
+### 3.3 Screenshots
 
 - Services & Ingress > SERVICES
 
@@ -188,16 +210,12 @@ kubectl get ingress ingress-neg-api-ingress -n ingress-neg-api
 
     ![loadbalancing](./screenshots/neg-ingress-lb-3-backend-details.png?raw=true)
 
-## Deploy loadbalancer-type-api
 
-```bash
-sed -e "s|<project-id>|${PROJECT_ID}|g" loadbalancer-type-api-template.yaml > loadbalancer-type-api.yaml
-cat loadbalancer-type-api.yaml
+## 4. LoadBalancer Type with NodePort
 
-kubectl apply -f loadbalancer-type-api.yaml -n loadbalancer-type-api
-```
+### 4.1 Object Spec
 
-NOTE: Ingress is not required when creating a Service with the `LoadBalancer` type.
+NOTE: `Ingress` is not required when creating a Service with the `LoadBalancer` type.
 
 [loadbalancer-type-api-template.yaml](app/loadbalancer-type-api-template.yaml):
 
@@ -226,6 +244,15 @@ spec:
       protocol: TCP
 ```
 
+### 4.2 Deploy loadbalancer-type-api
+
+```bash
+sed -e "s|<project-id>|${PROJECT_ID}|g" loadbalancer-type-api-template.yaml > loadbalancer-type-api.yaml
+cat loadbalancer-type-api.yaml
+
+kubectl apply -f loadbalancer-type-api.yaml -n loadbalancer-type-api
+```
+
 Confirm that pod configuration and logs after deployment:
 
 ```bash
@@ -234,9 +261,11 @@ kubectl logs -l app=loadbalancer-type-api -n loadbalancer-type-api
 kubectl describe pods -n loadbalancer-type-api
 
 kubectl describe svc -n loadbalancer-type-api
+
+kubectl get svc -n loadbalancer-type-api
 ```
 
-### Screenshots
+### 4.3 Screenshots
 
 - Services & Ingress > SERVICES
 
@@ -248,7 +277,7 @@ kubectl describe svc -n loadbalancer-type-api
 
 ---
 
-## Cleanup
+## 5. Cleanup
 
 ```bash
 kubectl delete -f app/ingress-neg-api.yaml -n ingress-neg-api
