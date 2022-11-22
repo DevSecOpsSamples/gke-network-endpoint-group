@@ -52,8 +52,6 @@ gcloud container clusters get-credentials sample-cluster
 ```bash
 kubectl create namespace neg-ingress-api
 kubectl create namespace loadbalancer-type-api
-
-kubectl create namespace neg-false-api
 ```
 
 ---
