@@ -12,7 +12,7 @@ The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Por
 |                            | Ingress/NEG   |  LoadBalancer     |
 |----------------------------|---------------|-------------------|
 | K8s Service Type           | ClusterIP     | LoadBalancer      |
-| Load Balancer Type| O      | Application   | Network           |
+| Load Balancer Type         | Application   | Network           |
 | Use a NodePort             | X             | O                 |
 
 ```bash
