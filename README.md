@@ -9,10 +9,10 @@ The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Por
 - [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
 - [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
 
-|                            | Ingress/NEG   |  LoadBalancer    |
+|                            | Ingress/NEG   |  LoadBalancer     |
 |----------------------------|---------------|-------------------|
 | K8s Service Type           | ClusterIP     | LoadBalancer      |
-| Create a GCP Load Balancer | O             | X                 |
+| Load Balancer Type| O      | Application   | Network           |
 | Use a NodePort             | X             | O                 |
 
 ```bash
