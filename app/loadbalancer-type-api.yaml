@@ -40,7 +40,7 @@ spec:
   ports:
     - port: 80
       targetPort: 8000
-      # nodePort: 31000
+      nodePort: 31000
       protocol: TCP
 ---
 apiVersion: autoscaling/v2beta2
