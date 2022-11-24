@@ -173,7 +173,7 @@ spec:
 
 ### 3.2 Deploy ingress-neg-api
 
-Create and deploy K8s Deployment, Service, HorizontalPodAutoscaler, Ingress, and GKE BackendConfig using the template files.
+Create and deploy K8s Deployment, Service, Ingress, GKE BackendConfig, and HorizontalPodAutoscaler using the template files.
 It may take around 5 minutes to create a load balancer, including health checking.
 
 ```bash
