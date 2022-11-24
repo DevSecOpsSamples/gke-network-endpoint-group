@@ -44,6 +44,10 @@ nodeport-type-api       NodePort       10.25.129.2     <none>           80:32000
     - Object Spec
     - Deploy loadbalancer-type-api
     - Screenshots
+5. LoadBalancer Type with NodePort
+5.1 Object Spec
+5.2 Deploy nodeport-type-api
+5.3 Create a firewall rule for node port
 - Cleanup
 
 ---
@@ -461,11 +465,6 @@ gcloud compute firewall-rules describe test-node-port
 ```
 
 ```bash
-NAME            NETWORK  DIRECTION  PRIORITY  ALLOW      DENY  DISABLED
-test-node-port  default  INGRESS    1000      tcp:32000        False
-```
-
-```bash
 allowed:
 - IPProtocol: tcp
   ports:
@@ -521,6 +520,7 @@ curl http://$EXTERNAL_IP:32000
 ```bash
 kubectl delete -f app/ingress-neg-api.yaml
 kubectl delete -f app/loadbalancer-type-api.yaml
+kubectl delete -f app/nodeport-type-api.yaml
 
 gcloud compute firewall-rules delete test-node-port
 
