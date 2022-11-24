@@ -7,10 +7,6 @@
 GCP recommends using the container-native load balancer through Ingress to evenly distribute traffic to Pods.
 This project provides sample code to understand differences among Ingress/ClusterIP, LoadBalancer, and NodePort on GKE.
 
-- [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
-- [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
-- [nodeport-type-api-template.yaml](app/nodeport-type-api-template.yaml)
-
 |                       | Ingress/NEG   |  LoadBalancer     |  NodePort     |
 |-----------------------|---------------|-------------------|---------------|
 | Type of K8s Service   | ClusterIP     | LoadBalancer      | NodePort      |
@@ -19,6 +15,10 @@ This project provides sample code to understand differences among Ingress/Cluste
 | Endpoint              | Frontend external IP of load balancer | Service external IP                 | Node external IP                  |
 
 A network endpoint group (NEG) is a configuration object that specifies a group of backend endpoints or services.
+
+- [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
+- [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
+- [nodeport-type-api-template.yaml](app/nodeport-type-api-template.yaml)
 
 ```bash
 kubectl get svc
@@ -31,16 +31,12 @@ loadbalancer-type-api   LoadBalancer   10.25.131.128   34.133.110.139   80:31000
 nodeport-type-api       NodePort       10.25.129.2     <none>           80:32000/TCP   17m
 ```
 
-## Terminology
-Load Balancing
-Network Endpoint Group(NEG)
-
-
-
 ## Objectives
 
-- Learn about differences among Ingress, LoadBalacer, and NodePort on GKE
-- Learn about manifests for Deployment, Service, Ingress, BackendConfig, and HorizontalPodAutoscaler.
+Learn about the below:
+- Differences among Ingress, LoadBalacer, and NodePort on GKE
+- Manifests for Deployment, Service, Ingress, BackendConfig, and HorizontalPodAutoscaler.
+- Zonal network endpoint group of HTTP(S) load balancer
 
 ## Table of Contents
 
@@ -68,6 +64,7 @@ Network Endpoint Group(NEG)
 
 - [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install)
 - [Install kubectl and configure cluster access](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl)
+- [Install the jq](https://stedolan.github.io/jq/download/)
 
 ### Set environment variables
 
@@ -229,6 +226,22 @@ status:
   loadBalancer: {}
 ```
 
+```bash
+kubectl get svc ingress-neg-api -o=jsonpath="{.metadata.annotations.cloud\.google\.com/neg-status}" | jq
+```
+
+```json
+{
+  "network_endpoint_groups": {
+    "8000": "k8s1-d0ddc61c-default-ingress-neg-api-8000-276c73a2"
+  },
+  "zones": [
+    "us-central1-b",
+    "us-central1-c"
+  ]
+}
+```
+
 ### 3.3 Screenshots
 
 - Services & Ingress > SERVICES
@@ -315,6 +328,13 @@ kubectl logs -l app=loadbalancer-type-api
 
 ```bash
 kubectl get service loadbalancer-type-api --output yaml
+```
+
+```yaml
+status:
+  loadBalancer:
+    ingress:
+    - ip: 34.133.110.139
 ```
 
 ```yaml
@@ -505,7 +525,7 @@ Connecting an external IP with a node port:
 ```bash
 EXTERNAL_IP=$(kubectl get nodes -o custom-columns='EXTERNAL-IP:status.addresses[?(@.type=="ExternalIP")].address' | sort | head -n 1)
 echo $EXTERNAL_IP
-curl http://$EXTERNAL_IP:32000
+curl http://$EXTERNAL_IP:32000 | jq
 ```
 
 ```json
