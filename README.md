@@ -44,15 +44,15 @@ Learn about the below:
 - Create a GKE cluster and namespaces
 - Build and push to GCR
 - Ingress with Network Endpoint Group(NEG)
-    - Object Spec
+    - Manifest
     - Deploy ingress-neg-api
     - Screenshots
 - LoadBalancer Type with NodePort
-    - Object Spec
+    - Manifest
     - Deploy loadbalancer-type-api
     - Screenshots
 - LoadBalancer Type with NodePort
-    - Object Spec
+    - Manifest
     - Deploy nodeport-type-api
     - Create a firewall rule for node port
 - Cleanup
@@ -107,7 +107,7 @@ docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 
 ## 3. Ingress with Network Endpoint Group(NEG)
 
-### 3.1 Object Spec
+### 3.1 Manifest
 
 [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml):
 
@@ -281,7 +281,7 @@ kubectl get svc ingress-neg-api -o=jsonpath="{.metadata.annotations.cloud\.googl
 
 ## 4. LoadBalancer Type with NodePort
 
-### 4.1 Object Spec
+### 4.1 Manifest
 
 NOTE: `Ingress` is not required when creating a Service with the `LoadBalancer` type.
 
@@ -400,7 +400,7 @@ status:
 
 ## 5. NodePort Type
 
-### 5.1 Object Spec
+### 5.1 Manifest
 
 [nodeport-type-api-template.yaml](app/nodeport-type-api-template.yaml):
 
