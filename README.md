@@ -24,7 +24,7 @@ kubectl get svc
 NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)        AGE
 ingress-neg-api         ClusterIP      10.25.130.238   <none>           8000/TCP       40m
 loadbalancer-type-api   LoadBalancer   10.25.131.128   34.133.110.139   80:31000/TCP   31m
-nodeport-type-api       NodePort       10.25.129.2     <none>           80:31854/TCP   17m
+nodeport-type-api       NodePort       10.25.129.2     <none>           80:32000/TCP   17m
 ```
 
 ## Objectives
@@ -439,7 +439,7 @@ spec:
   - IPv4
   ipFamilyPolicy: SingleStack
   ports:
-  - nodePort: 31854
+  - nodePort: 32000
     port: 80
     protocol: TCP
     targetPort: 8000
@@ -451,7 +451,68 @@ status:
   loadBalancer: {}
 ```
 
-### 5.3 Screenshots
+### 5.3 Create a firewall rule for node port
+
+Create a firewall rule to allow TCP traffic on your node port:
+
+```bash
+gcloud compute firewall-rules create test-node-port --allow tcp:32000
+gcloud compute firewall-rules describe test-node-port
+```
+
+```bash
+NAME            NETWORK  DIRECTION  PRIORITY  ALLOW      DENY  DISABLED
+test-node-port  default  INGRESS    1000      tcp:32000        False
+```
+
+```bash
+allowed:
+- IPProtocol: tcp
+  ports:
+  - '32000'
+creationTimestamp: '2022-11-23T21:45:10.124-08:00'
+description: ''
+direction: INGRESS
+disabled: false
+id: '1317487238481885705'
+kind: compute#firewall
+logConfig:
+  enable: false
+name: test-node-port
+network: https://www.googleapis.com/compute/v1/projects/moloco-sre/global/networks/default
+priority: 1000
+selfLink: https://www.googleapis.com/compute/v1/projects/moloco-sre/global/firewalls/test-node-port
+sourceRanges:
+- 0.0.0.0/0
+```
+
+```bash
+kubectl get nodes -o custom-columns='NAME:metadata.name,ZONE:metadata.labels.failure-domain\.beta\.kubernetes\.io/zone,CPU:.status.capacity.cpu,MEM:.status.capacity.memory,EXTERNAL-IP:.status.addresses[?(@.type=="ExternalIP")].address'
+
+# or kubectl get nodes --output wide
+```
+
+```bash
+NAME                                            ZONE            CPU   MEM         EXTERNAL-IP
+gk3-sample-cluster-default-pool-21a76107-42lv   us-central1-b   2     4026000Ki   34.71.157.59
+gk3-sample-cluster-default-pool-21a76107-mgfr   us-central1-b   2     4026000Ki   34.172.14.138
+gk3-sample-cluster-default-pool-7a0947da-blv6   us-central1-c   2     4026000Ki   34.170.106.6
+gk3-sample-cluster-default-pool-7a0947da-nkc8   us-central1-c   2     4026008Ki   34.173.168.212
+```
+
+Connect to external IP with a node port:
+
+```bash
+EXTERNAL_IP=$(kubectl get nodes -o custom-columns='EXTERNAL-IP:status.addresses[?(@.type=="ExternalIP")].address' | sort | head -n 1)
+echo $EXTERNAL_IP
+curl http://$EXTERNAL_IP:32000
+```
+
+```json
+{"host":"34.170.106.6:32000","message":"ping-api","method":"GET","url":"http://34.170.106.6:32000/"}
+```
+
+### 5.4 Screenshots
 
 ---
 
@@ -460,6 +521,8 @@ status:
 ```bash
 kubectl delete -f app/ingress-neg-api.yaml
 kubectl delete -f app/loadbalancer-type-api.yaml
+
+gcloud compute firewall-rules delete test-node-port
 
 gcloud container clusters delete sample-cluster
 ```
@@ -477,3 +540,7 @@ gcloud container clusters delete sample-cluster
     - [GKE Ingress for HTTP(S) Load Balancing](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress)
     - [Container-native load balancing through Ingress](https://cloud.google.com/kubernetes-engine/docs/how-to/container-native-load-balancing)
     - [Container-native load balancing through standalone zonal NEGs](https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg)
+
+<br/>
+
+- [Kubernetes Documentation / Reference / Command line tool (kubectl) / kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
