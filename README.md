@@ -117,7 +117,7 @@ docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 | Service | metadata.annotations        | cloud.google.com/neg: '{"ingress": true}'  |
 | Ingress | metadata.annotations        | kubernetes.io/ingress.class: gce           |
 
-The container-native load balancing is default from GKE cluster v1.17+ and does not require an explicit cloud.google.com/neg: '{"ingress": true}' Service annotation.
+The container-native load balancing is default from GKE cluster v1.17+ and does not require an explicit `cloud.google.com/neg: '{"ingress": true}'` Service annotation.
 
 ```yaml
 apiVersion: v1
@@ -332,6 +332,8 @@ kubectl logs -l app=loadbalancer-type-api
 ```bash
 kubectl get service loadbalancer-type-api --output yaml
 ```
+
+GKE create a TCP load balancer and assign an external IP:
 
 ```yaml
 status:
