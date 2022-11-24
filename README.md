@@ -4,17 +4,21 @@
 
 ## Overview
 
-GCP recommend to use the container-native load balancer through Ingress to evenly distribute traffic to Pods.
-This project provides sample code to understand about differences among Ingress/ClusterIP, LoadBalancer and Node Port of GKE.
+GCP recommends using the container-native load balancer through Ingress to evenly distribute traffic to Pods.
+This project provides sample code to understand differences among Ingress/ClusterIP, LoadBalancer, and NodePort on GKE.
 
 - [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
 - [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
+- [nodeport-type-api-template.yaml](app/nodeport-type-api-template.yaml)
 
-|                            | Ingress/NEG   |  LoadBalancer     |  NodePort     |
-|----------------------------|---------------|-------------------|---------------|
-| K8s Service Type           | ClusterIP     | LoadBalancer      | NodePort      |
-| Load Balancer Type         | Application Load Balancer | Network Load Balancer | X      |
-| Use a NodePort             | X             | O                 | O                 |
+|                       | Ingress/NEG   |  LoadBalancer     |  NodePort     |
+|-----------------------|---------------|-------------------|---------------|
+| Type of K8s Service   | ClusterIP     | LoadBalancer      | NodePort      |
+| Type of Load Balancer | HTTP(S) load balancer | Network load balancer(TCP/UDP) | X  |
+| Use a NodePort        | X             | O                 | O                  |
+| Endpoint              | Frontend external IP of load balancer | Service external IP                 | Node external IP                  |
+
+A network endpoint group (NEG) is a configuration object that specifies a group of backend endpoints or services.
 
 ```bash
 kubectl get svc
@@ -27,9 +31,15 @@ loadbalancer-type-api   LoadBalancer   10.25.131.128   34.133.110.139   80:31000
 nodeport-type-api       NodePort       10.25.129.2     <none>           80:32000/TCP   17m
 ```
 
+## Terminology
+Load Balancing
+Network Endpoint Group(NEG)
+
+
+
 ## Objectives
 
-- Learn about difference among Ingress, LoadBalacer, and NodePort on GKE
+- Learn about differences among Ingress, LoadBalacer, and NodePort on GKE
 - Learn about manifests for Deployment, Service, Ingress, BackendConfig, and HorizontalPodAutoscaler.
 
 ## Table of Contents
@@ -44,10 +54,10 @@ nodeport-type-api       NodePort       10.25.129.2     <none>           80:32000
     - Object Spec
     - Deploy loadbalancer-type-api
     - Screenshots
-5. LoadBalancer Type with NodePort
-5.1 Object Spec
-5.2 Deploy nodeport-type-api
-5.3 Create a firewall rule for node port
+- LoadBalancer Type with NodePort
+    - Object Spec
+    - Deploy nodeport-type-api
+    - Create a firewall rule for node port
 - Cleanup
 
 ---
@@ -77,7 +87,7 @@ gcloud config set compute/zone ${COMPUTE_ZONE}
 
 ## 1. Create a GKE cluster
 
-Create an Autopilot GKE cluster. It may take around 9 minutes.
+Create an [Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview) GKE cluster. It may take around 9 minutes.
 
 ```bash
 gcloud container clusters create-auto sample-cluster --region=${COMPUTE_ZONE}
@@ -173,12 +183,10 @@ cat ingress-neg-api.yaml
 kubectl apply -f ingress-neg-api.yaml
 ```
 
-Confirm that pod configuration and logs after deployment:
+Confirm that pod logs and service configuration after deployment:
 
 ```bash
 kubectl logs -l app=ingress-neg-api
-
-kubectl describe pods
 ```
 
 ```bash
@@ -257,7 +265,6 @@ status:
 
     ![loadbalancing](./screenshots/neg-ingress-lb-3-backend-details.png?raw=true)
 
-
 ## 4. LoadBalancer Type with NodePort
 
 ### 4.1 Object Spec
@@ -300,12 +307,10 @@ cat loadbalancer-type-api.yaml
 kubectl apply -f loadbalancer-type-api.yaml
 ```
 
-Confirm that pod configuration and logs after deployment:
+Confirm that pod logs and service configuration after deployment:
 
 ```bash
 kubectl logs -l app=loadbalancer-type-api
-
-kubectl describe pods loadbalancer-type-api
 ```
 
 ```bash
@@ -372,12 +377,9 @@ status:
 
 ---
 
-
-## 5. LoadBalancer Type with NodePort
+## 5. NodePort Type
 
 ### 5.1 Object Spec
-
-NOTE: `Ingress` is not required when creating a Service with the `NodePort` type.
 
 [nodeport-type-api-template.yaml](app/nodeport-type-api-template.yaml):
 
@@ -395,6 +397,7 @@ spec:
   ports:
     - port: 80
       targetPort: 8000
+      nodePort: 32000
       protocol: TCP
 ```
 
@@ -407,12 +410,10 @@ cat nodeport-type-api.yaml
 kubectl apply -f nodeport-type-api.yaml
 ```
 
-Confirm that pod configuration and logs after deployment:
+Confirm that pod logs and service configuration after deployment:
 
 ```bash
 kubectl logs -l app=nodeport-type-api
-
-kubectl describe pods
 ```
 
 ```bash
@@ -499,7 +500,7 @@ gk3-sample-cluster-default-pool-7a0947da-blv6   us-central1-c   2     4026000Ki 
 gk3-sample-cluster-default-pool-7a0947da-nkc8   us-central1-c   2     4026008Ki   34.173.168.212
 ```
 
-Connect to external IP with a node port:
+Connecting an external IP with a node port:
 
 ```bash
 EXTERNAL_IP=$(kubectl get nodes -o custom-columns='EXTERNAL-IP:status.addresses[?(@.type=="ExternalIP")].address' | sort | head -n 1)
@@ -508,7 +509,12 @@ curl http://$EXTERNAL_IP:32000
 ```
 
 ```json
-{"host":"34.170.106.6:32000","message":"ping-api","method":"GET","url":"http://34.170.106.6:32000/"}
+{
+  "host":"34.170.106.6:32000",
+  "message":"ping-api",
+  "method":"GET",
+  "url":"http://34.170.106.6:32000/"
+}
 ```
 
 ### 5.4 Screenshots
@@ -536,6 +542,7 @@ gcloud container clusters delete sample-cluster
 
 - Google Kubernetes Engine (GKE) > Documentation > Guides
 
+    - [Network overview](https://cloud.google.com/kubernetes-engine/docs/concepts/network-overview)
     - [Exposing applications using services](https://cloud.google.com/kubernetes-engine/docs/how-to/exposing-apps)
     - [GKE Ingress for HTTP(S) Load Balancing](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress)
     - [Container-native load balancing through Ingress](https://cloud.google.com/kubernetes-engine/docs/how-to/container-native-load-balancing)
