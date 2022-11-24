@@ -34,9 +34,10 @@ nodeport-type-api       NodePort       10.25.129.2     <none>           80:32000
 ## Objectives
 
 Learn about the below:
-- Differences among Ingress, LoadBalacer, and NodePort on GKE
+
+- Differences among Ingress, LoadBalacer, and NodePort on GKE.
 - Manifests for Deployment, Service, Ingress, BackendConfig, and HorizontalPodAutoscaler.
-- Zonal network endpoint group of HTTP(S) load balancer
+- HTTP(S) load balancer and Zonal network endpoint group.
 
 ## Table of Contents
 
