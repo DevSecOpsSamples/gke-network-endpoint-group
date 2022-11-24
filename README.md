@@ -30,7 +30,7 @@ nodeport-type-api       NodePort       10.25.129.2     <none>           80:31854
 ## Objectives
 
 - Learn about difference among Ingress, LoadBalacer, and NodePort on GKE
-- Learn about manifests for 3 types
+- Learn about manifests for Deployment, Service, Ingress, BackendConfig, and HorizontalPodAutoscaler.
 
 ## Table of Contents
 
