@@ -111,11 +111,13 @@ docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 
 [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml):
 
-| Kind    | Element                     | Value             | Description             |
-|---------|-----------------------------|-------------------|-------------------------|
-| Service | spec.type                   | **ClusterIP**     |                         |
-| Service | metadata.annotations        | cloud.google.com/neg: '{"ingress": true}'  | The container-native load balancing is default from GKE cluster v1.17+ and does not require an explicit cloud.google.com/neg: '{"ingress": true}' Service annotation. |
-| Ingress | metadata.annotations        | kubernetes.io/ingress.class: gce           |                         |
+| Kind    | Element                     | Value             |
+|---------|-----------------------------|-------------------|
+| Service | spec.type                   | **ClusterIP**     |
+| Service | metadata.annotations        | cloud.google.com/neg: '{"ingress": true}'  |
+| Ingress | metadata.annotations        | kubernetes.io/ingress.class: gce           |
+
+The container-native load balancing is default from GKE cluster v1.17+ and does not require an explicit cloud.google.com/neg: '{"ingress": true}' Service annotation.
 
 ```yaml
 apiVersion: v1
