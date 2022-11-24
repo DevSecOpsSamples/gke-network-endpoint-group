@@ -9,7 +9,7 @@ docker tag python-ping-api:latest gcr.io/${PROJECT_ID}/python-ping-api:latest
 gcloud auth configure-docker
 docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 
-kubectl scale deployment python-ping-api --replicas=0
-kubectl scale deployment python-ping-api --replicas=3
+kubectl scale deployment ingress-neg-api --replicas=0
+kubectl scale deployment ingress-neg-api --replicas=3
 sleep 3
 kubectl get pods

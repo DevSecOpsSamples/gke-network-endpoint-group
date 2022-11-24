@@ -10,25 +10,27 @@ This project provides sample code to understand about differences among Network 
 - [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
 - [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
 
-|                            | Ingress/NEG   |  LoadBalancer     |
-|----------------------------|---------------|-------------------|
-| K8s Service Type           | ClusterIP     | LoadBalancer      |
-| Load Balancer Type         | Application Load Balancer | Network Load Balancer |
-| Use a NodePort             | X             | O                 |
+|                            | Ingress/NEG   |  LoadBalancer     |  NodePort     |
+|----------------------------|---------------|-------------------|---------------|
+| K8s Service Type           | ClusterIP     | LoadBalancer      | NodePort      |
+| Load Balancer Type         | Application Load Balancer | Network Load Balancer | X      |
+| Use a NodePort             | X             | O                 | O                 |
 
 ```bash
 kubectl get svc
 ```
 
 ```bash
-NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        AGE
-ingress-neg-api         ClusterIP      10.99.128.193   <none>          8000/TCP       158m
-loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/TCP   149m
+NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)        AGE
+ingress-neg-api         ClusterIP      10.25.130.238   <none>           8000/TCP       40m
+loadbalancer-type-api   LoadBalancer   10.25.131.128   34.133.110.139   80:31000/TCP   31m
+nodeport-type-api       NodePort       10.25.129.2     <none>           80:31854/TCP   17m
 ```
+
 ## Objectives
 
 - Learn about difference among Ingress, LoadBalacer, and NodePort on GKE
-- Learn about Kubernetes object specification for Ingress/ClusterIP and 3 LoadBalacer/NodePort
+- Learn about manifests for 3 types
 
 ## Table of Contents
 
@@ -69,18 +71,13 @@ gcloud config set compute/zone ${COMPUTE_ZONE}
 
 ---
 
-## 1. Create a GKE cluster and namespaces
+## 1. Create a GKE cluster
 
 Create an Autopilot GKE cluster. It may take around 9 minutes.
 
 ```bash
 gcloud container clusters create-auto sample-cluster --region=${COMPUTE_ZONE}
 gcloud container clusters get-credentials sample-cluster
-```
-
-```bash
-kubectl create namespace ingress-neg-api
-kubectl create namespace loadbalancer-type-api
 ```
 
 ---
@@ -153,8 +150,8 @@ spec:
   healthCheck:
     checkIntervalSec: 10
     timeoutSec: 10
-    healthyThreshold: 1
-    unhealthyThreshold: 3
+    healthyThreshold: 2
+    unhealthyThreshold: 5
     port: 8000
     type: HTTP
     requestPath: /ping
@@ -178,11 +175,46 @@ Confirm that pod configuration and logs after deployment:
 kubectl logs -l app=ingress-neg-api
 
 kubectl describe pods
+```
 
-#kubectl get svc
-kubectl describe svc
+```bash
+kubectl get service ingress-neg-api --output yaml
+```
 
-kubectl get ingress ingress-neg-api-ingress
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    app: ingress-neg-api
+    cloud.google.com/backend-config: '{"default": "ingress-neg-api-backend-config"}'
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/neg-status: '{"network_endpoint_groups":{"8000":"k8s1-d0ddc61c-default-ingress-neg-api-8000-276c73a2"},"zones":["us-central1-b","us-central1-c"]}'
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"app":"ingress-neg-api","cloud.google.com/backend-config":"{\"default\": \"ingress-neg-api-backend-config\"}","cloud.google.com/neg":"{\"ingress\": true}"},"name":"ingress-neg-api","namespace":"default"},"spec":{"ports":[{"port":8000,"protocol":"TCP","targetPort":8000}],"selector":{"app":"ingress-neg-api"},"type":"ClusterIP"}}
+  creationTimestamp: "2022-11-24T04:01:41Z"
+  name: ingress-neg-api
+  namespace: default
+  resourceVersion: "75752"
+  uid: 5687946c-096f-4c77-b945-4011e86221a0
+spec:
+  clusterIP: 10.25.130.238
+  clusterIPs:
+  - 10.25.130.238
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: ingress-neg-api
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
 ```
 
 ### 3.3 Screenshots
@@ -269,11 +301,53 @@ Confirm that pod configuration and logs after deployment:
 ```bash
 kubectl logs -l app=loadbalancer-type-api
 
-kubectl describe pods
+kubectl describe pods loadbalancer-type-api
+```
 
-kubectl describe svc
+```bash
+kubectl get service loadbalancer-type-api --output yaml
+```
 
-kubectl get svc
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    app: loadbalancer-type-api
+    cloud.google.com/neg: '{"ingress":true}'
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"app":"loadbalancer-type-api"},"name":"loadbalancer-type-api","namespace":"default"},"spec":{"externalTrafficPolicy":"Local","ports":[{"nodePort":31000,"port":80,"protocol":"TCP","targetPort":8000}],"selector":{"app":"loadbalancer-type-api"},"type":"LoadBalancer"}}
+  creationTimestamp: "2022-11-24T04:10:30Z"
+  finalizers:
+  - service.kubernetes.io/load-balancer-cleanup
+  name: loadbalancer-type-api
+  namespace: default
+  resourceVersion: "81655"
+  uid: e2573c24-fc45-4bb7-9c89-2521a4bf5139
+spec:
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 10.25.131.128
+  clusterIPs:
+  - 10.25.131.128
+  externalTrafficPolicy: Local
+  healthCheckNodePort: 31456
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - nodePort: 31000
+    port: 80
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: loadbalancer-type-api
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - ip: 34.133.110.139
 ```
 
 ### 4.3 Screenshots
@@ -294,7 +368,94 @@ kubectl get svc
 
 ---
 
-## 5. Cleanup
+
+## 5. LoadBalancer Type with NodePort
+
+### 5.1 Object Spec
+
+NOTE: `Ingress` is not required when creating a Service with the `NodePort` type.
+
+[nodeport-type-api-template.yaml](app/nodeport-type-api-template.yaml):
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodeport-type-api
+  annotations:
+    app: nodeport-type-api
+spec:
+  selector:
+    app: nodeport-type-api
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+```
+
+### 5.2 Deploy nodeport-type-api
+
+```bash
+sed -e "s|<project-id>|${PROJECT_ID}|g" nodeport-type-api-template.yaml > nodeport-type-api.yaml
+cat nodeport-type-api.yaml
+
+kubectl apply -f nodeport-type-api.yaml
+```
+
+Confirm that pod configuration and logs after deployment:
+
+```bash
+kubectl logs -l app=nodeport-type-api
+
+kubectl describe pods
+```
+
+```bash
+kubectl get service nodeport-type-api --output yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    app: nodeport-type-api
+    cloud.google.com/neg: '{"ingress":true}'
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"app":"nodeport-type-api"},"name":"nodeport-type-api","namespace":"default"},"spec":{"ports":[{"port":80,"protocol":"TCP","targetPort":8000}],"selector":{"app":"nodeport-type-api"},"type":"NodePort"}}
+  creationTimestamp: "2022-11-24T04:24:47Z"
+  name: nodeport-type-api
+  namespace: default
+  resourceVersion: "90492"
+  uid: 33f1feab-0846-4326-8fc0-e0704194653b
+spec:
+  clusterIP: 10.25.129.2
+  clusterIPs:
+  - 10.25.129.2
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - nodePort: 31854
+    port: 80
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: nodeport-type-api
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
+```
+
+### 5.3 Screenshots
+
+---
+
+## 6. Cleanup
 
 ```bash
 kubectl delete -f app/ingress-neg-api.yaml
