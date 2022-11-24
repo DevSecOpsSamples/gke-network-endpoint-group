@@ -5,7 +5,7 @@
 ## Overview
 
 GCP recommend to use the container-native load balancer through Ingress to evenly distribute traffic to Pods.
-This project provides sample code to understand about differences among Network Endpoint Group(NEG)/ClusterIP, LoadBalancer and Node Port of GKE.
+This project provides sample code to understand about differences among Ingress/ClusterIP, LoadBalancer and Node Port of GKE.
 
 - [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
 - [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
