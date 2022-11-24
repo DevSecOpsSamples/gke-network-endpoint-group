@@ -37,7 +37,7 @@ Learn about the below:
 
 - Differences among Ingress, LoadBalacer, and NodePort on GKE.
 - Manifests for Deployment, Service, Ingress, BackendConfig, and HorizontalPodAutoscaler.
-- HTTP(S) load balancer and Zonal network endpoint group.
+- How to use the container-native load balancing with a manifest.
 
 ## Table of Contents
 
@@ -114,7 +114,7 @@ docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 | Kind    | Element                     | Value             | Description             |
 |---------|-----------------------------|-------------------|-------------------------|
 | Service | spec.type                   | **ClusterIP**     |                         |
-| Service | metadata.annotations        | cloud.google.com/neg: '{"ingress": true}'  |                         |
+| Service | metadata.annotations        | cloud.google.com/neg: '{"ingress": true}'  | The container-native load balancing is default from GKE cluster v1.17+ and does not require an explicit cloud.google.com/neg: '{"ingress": true}' Service annotation. |
 | Ingress | metadata.annotations        | kubernetes.io/ingress.class: gce           |                         |
 
 ```yaml
