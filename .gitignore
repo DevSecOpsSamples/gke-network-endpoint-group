@@ -20,8 +20,9 @@ build
 # GKE
 
 # k8s
-neg-true-api.yaml
-neg-false-api.yaml
+ingress-neg-api.yaml
+loadbalancer-type-api.yaml
+nodeport-type-api.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
