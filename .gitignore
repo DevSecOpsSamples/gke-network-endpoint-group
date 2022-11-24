@@ -22,6 +22,7 @@ build
 # k8s
 ingress-neg-api.yaml
 loadbalancer-type-api.yaml
+nodeport-type-api.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

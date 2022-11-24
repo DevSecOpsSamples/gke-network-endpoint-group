@@ -4,7 +4,8 @@
 
 ## Overview
 
-The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Port of GKE.
+GCP recommend to use the container-native load balancer through Ingress to evenly distribute traffic to Pods.
+This project provides sample code to understand about differences among Network Endpoint Group(NEG)/ClusterIP, LoadBalancer and Node Port of GKE.
 
 - [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
 - [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
@@ -12,7 +13,7 @@ The sample project to compare Network Endpoint Group(NEG)/ClusterIP and Node Por
 |                            | Ingress/NEG   |  LoadBalancer     |
 |----------------------------|---------------|-------------------|
 | K8s Service Type           | ClusterIP     | LoadBalancer      |
-| Load Balancer Type         | Application   | Network           |
+| Load Balancer Type         | Application Load Balancer | Network Load Balancer |
 | Use a NodePort             | X             | O                 |
 
 ```bash
@@ -24,7 +25,6 @@ NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)  
 ingress-neg-api         ClusterIP      10.99.128.193   <none>          8000/TCP       158m
 loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/TCP   149m
 ```
-
 ## Objectives
 
 - Learn about difference among Ingress, LoadBalacer, and NodePort on GKE
@@ -56,8 +56,8 @@ loadbalancer-type-api   LoadBalancer   10.99.129.108   34.172.20.201   80:31000/
 ### Set environment variables
 
 ```bash
-PROJECT_ID="sample-project" # replace with your project
 COMPUTE_ZONE="us-central1"
+PROJECT_ID="sample-project" # replace with your project
 ```
 
 ### Set GCP project
@@ -104,9 +104,9 @@ docker push gcr.io/${PROJECT_ID}/python-ping-api:latest
 
 | Kind    | Element                     | Value             | Description             |
 |---------|-----------------------------|-------------------|-------------------------|
-| Service | spec.type                   | **ClusterIP**      |                         |
-| Service | metadata.annotations        | cloud.google.com/neg: '{"ingress": true}'       |                         |
-| Ingress | metadata.annotations        | kubernetes.io/ingress.class: gce       |                         |
+| Service | spec.type                   | **ClusterIP**     |                         |
+| Service | metadata.annotations        | cloud.google.com/neg: '{"ingress": true}'  |                         |
+| Ingress | metadata.annotations        | kubernetes.io/ingress.class: gce           |                         |
 
 ```yaml
 apiVersion: v1
@@ -169,20 +169,20 @@ It may take around 5 minutes to create a load balancer, including health checkin
 sed -e "s|<project-id>|${PROJECT_ID}|g" ingress-neg-api-template.yaml > ingress-neg-api.yaml
 cat ingress-neg-api.yaml
 
-kubectl apply -f ingress-neg-api.yaml -n ingress-neg-api
+kubectl apply -f ingress-neg-api.yaml
 ```
 
 Confirm that pod configuration and logs after deployment:
 
 ```bash
-kubectl logs -l app=ingress-neg-api -n ingress-neg-api
+kubectl logs -l app=ingress-neg-api
 
-kubectl describe pods -n ingress-neg-api
+kubectl describe pods
 
-#kubectl get svc -n ingress-neg-api
-kubectl describe svc -n ingress-neg-api
+#kubectl get svc
+kubectl describe svc
 
-kubectl get ingress ingress-neg-api-ingress -n ingress-neg-api
+kubectl get ingress ingress-neg-api-ingress
 ```
 
 ### 3.3 Screenshots
@@ -261,19 +261,19 @@ spec:
 sed -e "s|<project-id>|${PROJECT_ID}|g" loadbalancer-type-api-template.yaml > loadbalancer-type-api.yaml
 cat loadbalancer-type-api.yaml
 
-kubectl apply -f loadbalancer-type-api.yaml -n loadbalancer-type-api
+kubectl apply -f loadbalancer-type-api.yaml
 ```
 
 Confirm that pod configuration and logs after deployment:
 
 ```bash
-kubectl logs -l app=loadbalancer-type-api -n loadbalancer-type-api
+kubectl logs -l app=loadbalancer-type-api
 
-kubectl describe pods -n loadbalancer-type-api
+kubectl describe pods
 
-kubectl describe svc -n loadbalancer-type-api
+kubectl describe svc
 
-kubectl get svc -n loadbalancer-type-api
+kubectl get svc
 ```
 
 ### 4.3 Screenshots
@@ -297,18 +297,22 @@ kubectl get svc -n loadbalancer-type-api
 ## 5. Cleanup
 
 ```bash
-kubectl delete -f app/ingress-neg-api.yaml -n ingress-neg-api
-kubectl delete -f app/loadbalancer-type-api.yaml -n loadbalancer-type-api
+kubectl delete -f app/ingress-neg-api.yaml
+kubectl delete -f app/loadbalancer-type-api.yaml
 
 gcloud container clusters delete sample-cluster
 ```
 
 ## References
 
-- [Cloud Load Balancing > Documentation > Guides > Serverless network endpoint groups overview](https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts)
+- Cloud Load Balancing > Documentation > Guides
+    - [Serverless network endpoint groups overview](https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts)
 
-- [Cloud Load Balancing > Documentation > Guides > Container-native load balancing through Ingress](https://cloud.google.com/kubernetes-engine/docs/how-to/container-native-load-balancing)
+<br/>
 
-- [Google Kubernetes Engine (GKE) > Documentation > Guides > GKE Ingress for HTTP(S) Load Balancing](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress)
+- Google Kubernetes Engine (GKE) > Documentation > Guides
 
-- [Google Kubernetes Engine (GKE) > Documentation > Guides > Container-native load balancing through standalone zonal NEGs](https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg)
+    - [Exposing applications using services](https://cloud.google.com/kubernetes-engine/docs/how-to/exposing-apps)
+    - [GKE Ingress for HTTP(S) Load Balancing](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress)
+    - [Container-native load balancing through Ingress](https://cloud.google.com/kubernetes-engine/docs/how-to/container-native-load-balancing)
+    - [Container-native load balancing through standalone zonal NEGs](https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg)
