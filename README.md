@@ -39,7 +39,7 @@ Learn about the below:
 
 - Differences among Ingress, LoadBalacer, and NodePort on GKE.
 - Manifests for Deployment, Service, Ingress, BackendConfig, and HorizontalPodAutoscaler.
-- How to use the container-native load balancing with a manifest.
+- How to use the container-native load balancer with a manifest.
 
 ## Table of Contents
 
