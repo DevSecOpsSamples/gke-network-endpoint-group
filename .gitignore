@@ -1,3 +1,29 @@
+build
+.gradle
+.vscode
+
+*.log
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# MAC
+**/.DS_Store
+
+# internal
+*internal*
+
+# GKE
+
+# k8s
+ingress-neg-api.yaml
+loadbalancer-type-api.yaml
+nodeport-type-api.yaml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
