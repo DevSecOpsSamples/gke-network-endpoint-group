@@ -1,11 +1,10 @@
 # Sample project for load balancing and K8s Service expose on GKE
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-endpoint-group&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-endpoint-group) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-endpoint-group&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-endpoint-group)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-loadbalancer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-loadbalancer) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-loadbalancer&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-loadbalancer)
 
 ## Overview
 
 This project provides sample code to understand differences among Ingress/ClusterIP, LoadBalancer, and NodePort on GKE. GCP recommends using the container-native load balancer through Ingress to evenly distribute traffic to Pods.
-
 
 ![Services](./screenshots/services.png?raw=true)
 
