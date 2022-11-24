@@ -4,17 +4,9 @@
 
 ## Overview
 
-GCP recommends using the container-native load balancer through Ingress to evenly distribute traffic to Pods.
-This project provides sample code to understand differences among Ingress/ClusterIP, LoadBalancer, and NodePort on GKE.
+This project provides sample code to understand differences among Ingress/ClusterIP, LoadBalancer, and NodePort on GKE. GCP recommends using the container-native load balancer through Ingress to evenly distribute traffic to Pods.
 
-|                       | Ingress/NEG   |  LoadBalancer     |  NodePort     |
-|-----------------------|---------------|-------------------|---------------|
-| Type of K8s Service   | ClusterIP     | LoadBalancer      | NodePort      |
-| Type of Load Balancer | HTTP(S) load balancer | Network load balancer(TCP/UDP) | X  |
-| Use a NodePort        | X             | O                 | O                  |
-| Endpoint              | Frontend external IP of load balancer | Service external IP                 | Node external IP                  |
-
-A network endpoint group (NEG) is a configuration object that specifies a group of backend endpoints or services.
+![Services](./screenshots/services.png?raw=true)
 
 - [ingress-neg-api-template.yaml](app/ingress-neg-api-template.yaml)
 - [loadbalancer-type-api.yaml](app/loadbalancer-type-api.yaml)
@@ -30,6 +22,15 @@ ingress-neg-api         ClusterIP      10.25.130.238   <none>           8000/TCP
 loadbalancer-type-api   LoadBalancer   10.25.131.128   34.133.110.139   80:31000/TCP   31m
 nodeport-type-api       NodePort       10.25.129.2     <none>           80:32000/TCP   17m
 ```
+
+|                       | Ingress/NEG   |  LoadBalancer     |  NodePort     |
+|-----------------------|---------------|-------------------|---------------|
+| Type of K8s Service   | ClusterIP     | LoadBalancer      | NodePort      |
+| Type of Load Balancer | HTTP(S) load balancer | Network load balancer(TCP/UDP) | X  |
+| Use a NodePort        | X             | O                 | O                  |
+| Endpoint              | Frontend external IP of load balancer | Service external IP                 | Node external IP                  |
+
+A network endpoint group (NEG) is a configuration object that specifies a group of backend endpoints or services.
 
 ## Objectives
 
