@@ -1,4 +1,4 @@
-# Sample project for load balancing and K8s Service expose on GKE
+# GKE Service expose and load balancing
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-loadbalancer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-loadbalancer) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-loadbalancer&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-loadbalancer)
 
