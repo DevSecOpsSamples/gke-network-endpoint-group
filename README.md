@@ -1,10 +1,10 @@
-# GKE Service expose and load balancing
+# Exposing Kubernetes Service and LoadBalancer on GCP
 
 [![Build](https://github.com/DevSecOpsSamples/gke-network-loadbalancer/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DevSecOpsSamples/gke-network-loadbalancer/actions/workflows/build.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-loadbalancer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-loadbalancer) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-loadbalancer&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-loadbalancer)
 
 ## Overview
 
-This project provides sample code to understand differences among Ingress/ClusterIP, LoadBalancer, and NodePort on GKE. GCP recommends using the container-native load balancer through Ingress to evenly distribute traffic to Pods.
+This project provides sample code to understand the differences between Ingress/ClusterIP, LoadBalancer, and NodePort on GKE. To evenly distribute traffic to Pods, it's recommended to use the container-native load balancer and Ingress by GCP.
 
 ![Services](./screenshots/services.png?raw=true)
 
@@ -30,33 +30,33 @@ nodeport-type-api       NodePort       10.25.129.2     <none>           80:32000
 | Use a NodePort        | X             | O                 | O                  |
 | Endpoint              | Frontend external IP of load balancer | Service external IP                 | Node external IP                  |
 
-A network endpoint group (NEG) is a configuration object that specifies a group of backend endpoints or services.
+The Network Endpoint Group (NEG) is a configuration object that specifies a group of backend endpoints or services.
 
 ## Objectives
 
-Learn about the below:
+Learn about the following topics:
 
-- Differences among Ingress, LoadBalacer, and NodePort on GKE.
-- Manifests for Deployment, Service, Ingress, BackendConfig, and HorizontalPodAutoscaler.
-- How to use the container-native load balancer with a manifest.
+- Differences among Ingress, LoadBalancer, and NodePort on GKE
+- Manifests for Deployment, Service, Ingress, BackendConfig, and HorizontalPodAutoscaler
+- How to use the container-native load balancer with a manifest
 
 ## Table of Contents
 
-- Create a GKE cluster and namespaces
-- Build and push to GCR
-- Ingress with Network Endpoint Group(NEG)
+- [Step1: Create a GKE cluster and namespaces](#1-create-a-gke-cluster)
+- [Step2: Build and push to GCR](#2-build-and-push-to-gcr)
+- [Step3: Ingress with Network Endpoint Group (NEG)](#3-ingress-with-network-endpoint-groupneg)
     - Manifest
     - Deploy ingress-neg-api
     - Screenshots
-- LoadBalancer Type with NodePort
+- [Step4: LoadBalancer Type with NodePort](#4-loadbalancer-type-with-nodeport)
     - Manifest
     - Deploy loadbalancer-type-api
     - Screenshots
-- LoadBalancer Type with NodePort
+- [Step5: NodePort Type](#5-nodeport-type)
     - Manifest
     - Deploy nodeport-type-api
-    - Create a firewall rule for node port
-- Cleanup
+    - Create a firewall rule for the node port
+- [Cleanup](#6-cleanup)
 
 ---
 
@@ -72,7 +72,8 @@ Learn about the below:
 
 ```bash
 COMPUTE_ZONE="us-central1"
-PROJECT_ID="sample-project" # replace with your project
+# replace with your project
+PROJECT_ID="sample-project" 
 ```
 
 ### Set GCP project
@@ -174,8 +175,7 @@ spec:
 
 ### 3.2 Deploy ingress-neg-api
 
-Create and deploy K8s Deployment, Service, Ingress, GKE BackendConfig, and HorizontalPodAutoscaler using the template files.
-It may take around 5 minutes to create a load balancer, including health checking.
+Create and deploy a K8s Deployment, Service, Ingress, GKE BackendConfig, and HorizontalPodAutoscaler using the template files. It may take around 5 minutes to create a load balancer, including health checks.
 
 ```bash
 sed -e "s|<project-id>|${PROJECT_ID}|g" ingress-neg-api-template.yaml > ingress-neg-api.yaml
@@ -184,7 +184,7 @@ cat ingress-neg-api.yaml
 kubectl apply -f ingress-neg-api.yaml
 ```
 
-Confirm that pod logs and service configuration after deployment:
+Confirm Pod logs and service configuration after deployment:
 
 ```bash
 kubectl logs -l app=ingress-neg-api
@@ -324,7 +324,7 @@ cat loadbalancer-type-api.yaml
 kubectl apply -f loadbalancer-type-api.yaml
 ```
 
-Confirm that pod logs and service configuration after deployment:
+Confirm Pod logs and service configuration after deployment:
 
 ```bash
 kubectl logs -l app=loadbalancer-type-api
@@ -436,7 +436,7 @@ cat nodeport-type-api.yaml
 kubectl apply -f nodeport-type-api.yaml
 ```
 
-Confirm that pod logs and service configuration after deployment:
+Confirm Pod logs and service configuration after deployment:
 
 ```bash
 kubectl logs -l app=nodeport-type-api
