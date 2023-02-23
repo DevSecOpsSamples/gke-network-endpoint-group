@@ -42,21 +42,21 @@ Learn about the following topics:
 
 ## Table of Contents
 
-- Create a GKE cluster and namespaces
-- Build and push to GCR
-- Ingress with Network Endpoint Group (NEG)
+- [Step1: Create a GKE cluster and namespaces](#1-create-a-gke-cluster)
+- [Step2: Build and push to GCR](#2-build-and-push-to-gcr)
+- [Step3: Ingress with Network Endpoint Group (NEG)](#3-ingress-with-network-endpoint-groupneg)
     - Manifest
     - Deploy ingress-neg-api
     - Screenshots
-- LoadBalancer Type with NodePort
+- [Step4: LoadBalancer Type with NodePort](#4-loadbalancer-type-with-nodeport)
     - Manifest
     - Deploy loadbalancer-type-api
     - Screenshots
-- LoadBalancer Type with NodePort
+- [Step5: NodePort Type](#5-nodeport-type)
     - Manifest
     - Deploy nodeport-type-api
     - Create a firewall rule for the node port
-- Cleanup
+- [Cleanup](#6-cleanup)
 
 ---
 
@@ -72,7 +72,8 @@ Learn about the following topics:
 
 ```bash
 COMPUTE_ZONE="us-central1"
-PROJECT_ID="sample-project" # replace with your project
+# replace with your project
+PROJECT_ID="sample-project" 
 ```
 
 ### Set GCP project
