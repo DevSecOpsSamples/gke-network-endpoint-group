@@ -1,4 +1,4 @@
-# GKE Service expose and load balancing
+# Exposing Kubernetes Service and LoadBalancer on GCP
 
 [![Build](https://github.com/DevSecOpsSamples/gke-network-loadbalancer/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DevSecOpsSamples/gke-network-loadbalancer/actions/workflows/build.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-loadbalancer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-loadbalancer) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DevSecOpsSamples_gke-network-loadbalancer&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=DevSecOpsSamples_gke-network-loadbalancer)
 
